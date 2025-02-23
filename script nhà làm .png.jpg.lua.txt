@@ -257,7 +257,7 @@ AddButton(Tab7o, {
 
 
 -----Giao diện
-local espEnabled = false -- Biến kiểm soát trạng thái bật/tắt ESP
+local espEnabled = false -- Trạng thái bật/tắt ESP
 
 local function createESP(player)
     if player == game.Players.LocalPlayer then return end -- Không hiển thị bản thân
@@ -267,8 +267,8 @@ local function createESP(player)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(5, 0, 2, 0) -- Kích thước ban đầu
-    billboard.StudsOffset = Vector3.new(0, 0, 0) -- Giữ ở giữa cơ thể
+    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước ban đầu lớn hơn
+    billboard.StudsOffset = Vector3.new(0, 2, 0) -- Đặt trên đầu nhân vật
     billboard.AlwaysOnTop = true
 
     local textLabel = Instance.new("TextLabel", billboard)
@@ -289,9 +289,11 @@ local function createESP(player)
             if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local distance = (localPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
                 
-                -- Tăng kích thước khi ở xa, nhỏ lại khi gần
-                local scale = math.clamp(distance / 50, 1, 10) -- Giới hạn từ 1 đến 10
-                billboard.Size = UDim2.new(scale, 0, scale / 2, 0)
+                -- Kích thước ESP thay đổi theo khoảng cách
+                local scale = math.clamp(distance / 10, 1, 10) -- Giới hạn tỉ lệ từ 1 đến 10 lần
+                local size = 20 * scale -- Khi ở gần, kích thước là 20, khi xa tăng dần
+
+                billboard.Size = UDim2.new(0, size * 10, 0, size * 2) -- ESP lớn hơn khi xa
 
                 -- Hiển thị thông tin máu & khoảng cách
                 textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
@@ -336,7 +338,7 @@ AddButton(Tab9o, {
     Callback = function()
         toggleESP()
     end
-}) 
+})
 
 
 
