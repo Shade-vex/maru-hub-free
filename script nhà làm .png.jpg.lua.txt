@@ -257,6 +257,7 @@ AddButton(Tab7o, {
 
 
 -----Giao diện
+
 local espEnabled = false -- Trạng thái bật/tắt ESP
 
 local function createESP(player)
@@ -267,8 +268,8 @@ local function createESP(player)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước ban đầu lớn hơn
-    billboard.StudsOffset = Vector3.new(0, 2, 0) -- Đặt trên đầu nhân vật
+    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước ban đầu
+    billboard.StudsOffset = Vector3.new(0, 3, 0) -- Đặt ở giữa nhân vật
     billboard.AlwaysOnTop = true
 
     local textLabel = Instance.new("TextLabel", billboard)
@@ -411,5 +412,8 @@ AddButton(Tab9o, {
     Name = "ESP Trái Ác Quỷ",
     Callback = function()
         toggleFruitESP()
+    end
+})
+
     end
 })
