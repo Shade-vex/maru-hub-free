@@ -267,8 +267,8 @@ local function createESP(player)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(20, 0, 5, 0) -- Tăng kích thước rất lớn
-    billboard.StudsOffset = Vector3.new(0, 10, 0) -- Đặt cao hơn để dễ thấy
+    billboard.Size = UDim2.new(5, 0, 2, 0) -- Kích thước ban đầu
+    billboard.StudsOffset = Vector3.new(0, 0, 0) -- Giữ ở giữa cơ thể
     billboard.AlwaysOnTop = true
 
     local textLabel = Instance.new("TextLabel", billboard)
@@ -281,13 +281,22 @@ local function createESP(player)
 
     billboard.Parent = character.HumanoidRootPart
 
-    -- Cập nhật vị trí & thông tin máu
+    -- Cập nhật vị trí & kích thước theo khoảng cách
     spawn(function()
         while espEnabled and character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") do
             local humanoid = character:FindFirstChild("Humanoid")
-            local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
-            textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
-            wait(0.2)
+            local localPlayer = game.Players.LocalPlayer
+            if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (localPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+                
+                -- Tăng kích thước khi ở xa, nhỏ lại khi gần
+                local scale = math.clamp(distance / 50, 1, 10) -- Giới hạn từ 1 đến 10
+                billboard.Size = UDim2.new(scale, 0, scale / 2, 0)
+
+                -- Hiển thị thông tin máu & khoảng cách
+                textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
+            end
+            wait(0.1)
         end
         billboard:Destroy()
     end)
