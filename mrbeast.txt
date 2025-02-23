@@ -447,14 +447,17 @@ local function toggleFruitESP()
 
     if espFruitEnabled then
         if not fruitLabel then
+            local gui = Instance.new("ScreenGui")
+            gui.Parent = game.Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") or game.CoreGui
+
             fruitLabel = Instance.new("TextLabel")
             fruitLabel.Size = UDim2.new(0, 300, 0, 30) -- Kích thước dòng thông báo
-            fruitLabel.Position = UDim2.new(0.5, -150, 0.9, 0) -- Gần thanh trang bị
+            fruitLabel.Position = UDim2.new(0.5, -150, 0.85, 0) -- Gần thanh trang bị
             fruitLabel.BackgroundTransparency = 1
             fruitLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng mặc định
             fruitLabel.TextScaled = true
             fruitLabel.Font = Enum.Font.SourceSansBold
-            fruitLabel.Parent = game.Players.LocalPlayer.PlayerGui:FindFirstChildOfClass("ScreenGui")
+            fruitLabel.Parent = gui
         end
 
         spawn(function()
@@ -473,8 +476,14 @@ local function toggleFruitESP()
     end
 end
 
+-- Đảm bảo Tab9o tồn tại
+if not Tab9o then
+    Tab9o = AddTab("ESP")
+end
+
+-- Tạo nút bật/tắt ESP trái cây
 AddButton(Tab9o, {
-    Name = "esp fruit v2",
+    Name = "fake gamepass dò trái",
     Callback = function()
         toggleFruitESP()
     end
