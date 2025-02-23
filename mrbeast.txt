@@ -409,3 +409,73 @@ AddButton(Tab9o, {
         toggleFruitESP()
     end
 })
+
+
+-----esp fruit v2
+
+local espFruitEnabled = false -- Trạng thái bật/tắt ESP
+local fruitLabel = nil -- Biến lưu UI thông báo
+
+local function updateFruitESP()
+    if not espFruitEnabled then return end
+
+    local localPlayer = game.Players.LocalPlayer
+    if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local closestFruit = nil
+    local closestDistance = math.huge
+
+    for _, fruit in pairs(game.Workspace:GetChildren()) do
+        if fruit:IsA("Tool") and fruit:FindFirstChild("Handle") then
+            local distance = (localPlayer.Character.HumanoidRootPart.Position - fruit.Handle.Position).Magnitude
+            if distance < closestDistance then
+                closestFruit = fruit
+                closestDistance = distance
+            end
+        end
+    end
+
+    if closestFruit and fruitLabel then
+        fruitLabel.Text = string.format("FRUIT DETECTED: %dm away.", math.floor(closestDistance))
+    elseif fruitLabel then
+        fruitLabel.Text = "" -- Không hiển thị nếu không có trái cây
+    end
+end
+
+local function toggleFruitESP()
+    espFruitEnabled = not espFruitEnabled
+
+    if espFruitEnabled then
+        if not fruitLabel then
+            fruitLabel = Instance.new("TextLabel")
+            fruitLabel.Size = UDim2.new(0, 300, 0, 30) -- Kích thước dòng thông báo
+            fruitLabel.Position = UDim2.new(0.5, -150, 0.9, 0) -- Gần thanh trang bị
+            fruitLabel.BackgroundTransparency = 1
+            fruitLabel.TextColor3 = Color3.new(1, 1, 1) -- Màu trắng mặc định
+            fruitLabel.TextScaled = true
+            fruitLabel.Font = Enum.Font.SourceSansBold
+            fruitLabel.Parent = game.Players.LocalPlayer.PlayerGui:FindFirstChildOfClass("ScreenGui")
+        end
+
+        spawn(function()
+            while espFruitEnabled do
+                updateFruitESP()
+                wait(0.5) -- Cập nhật mỗi 0.5 giây
+            end
+            if fruitLabel then
+                fruitLabel.Text = ""
+            end
+        end)
+    else
+        if fruitLabel then
+            fruitLabel.Text = ""
+        end
+    end
+end
+
+AddButton(Tab9o, {
+    Name = "esp fruit v2",
+    Callback = function()
+        toggleFruitESP()
+    end
+})
