@@ -1,0 +1,407 @@
+
+loadstring(game:HttpGet(("https://raw.githubusercontent.com/Shade-vex/shadevex/refs/heads/main/menu-for-you-hub.txt")))()
+
+       local Window = MakeWindow({
+         Hub = {
+         Title = "Vex hub Master",
+         Animation = "Shade-Vex"
+         },
+        Key = {
+        KeySystem = true,
+        Title = "Vex hub Master",
+        Description = "đăng kí cho Shade-Vex đi",
+        KeyLink = "https://discord.gg/DmN8sE7Y",
+        Keys = {"Premium_Key_29833z920j8"},
+        Notifi = {
+        Notifications = true,
+        CorrectKey = "Đang chạy script...",
+       Incorrectkey = "Key không tồn tại",
+       CopyKeyLink = "Đã sao chép link",
+      }
+    }
+  })
+
+       MinimizeButton({
+       Image = "http://www.roblox.com/asset/?id=123776424679172",
+       Size = {50, 50},
+       Color = Color3.fromRGB(10, 10, 10),
+       Corner = true,
+       Stroke = false,
+       StrokeColor = Color3.fromRGB(255, 0, 0)
+      })
+      
+------ Tab
+     local Tab1o = MakeTab({Name = "Discord"})
+     local Tab2o = MakeTab({Name = "Farm"})
+     local Tab3o = MakeTab({Name = "Biển"})
+     local Tab4o = MakeTab({Name = "Đảo"})
+     local Tab5o = MakeTab({Name = "Vật phẩm"})
+     local Tab6o = MakeTab({Name = "Trái và đột kích"})
+     local Tab7o = MakeTab({Name = "Dịch chuyển"})
+     local Tab8o = MakeTab({Name = "Chỉ số"})
+     local Tab9o = MakeTab({Name = "Giao diện"})
+     local Tab10o = MakeTab({Name = "Cửa hàng"})
+     local Tab11o = MakeTab({Name = "Khác"})
+
+
+----- Discord
+
+AddButton(Tab1o, {
+    Name = "Discord",
+    Callback = function()
+        local url = "https://discord.gg/pd2pJVd3" -- Thay your_invite_code bằng mã invite thật
+        if syn and syn.request then
+            syn.request({Url = url, Method = "GET"}) -- Dành cho Synapse X
+        elseif request then
+            request({Url = url, Method = "GET"}) -- Dành cho một số executor khác
+        elseif (getgenv and getgenv().request) then
+            getgenv().request({Url = url, Method = "GET"})
+        elseif (KRNL_LOADED) then
+            KRNL_LOADED({Url = url, Method = "GET"})
+        else
+            print("Không thể mở link trực tiếp, vui lòng mở thủ công: " .. url)
+        end
+    end
+})
+
+
+-----farm lvl
+
+local UIS = game:GetService("UserInputService")
+
+Dropdown = AddDropdown(Tab2o, {
+    Name = "Choose equipment",
+    Options = {"NOTHING", "MELEE", "TRÁI BLOX", "GUN", "SWORD"},
+    Default = "Choose equipment",
+    Callback = function(selected)
+        -- Xác định phím số tương ứng với từng loại vũ khí
+        local keyMap = {
+            ["NOTHING"] = nil,  -- Không làm gì cả
+            ["MELEE"] = Enum.KeyCode.One,    -- Melee ở ô số 1
+            ["TRÁI BLOX"] = Enum.KeyCode.Four, -- Trái Ác Quỷ ở ô số 4
+            ["GUN"] = Enum.KeyCode.Three,    -- Súng ở ô số 3
+            ["SWORD"] = Enum.KeyCode.Two     -- Kiếm ở ô số 2
+        }
+
+        local key = keyMap[selected]
+        if key then
+            -- Nhấn và nhả phím để đổi trang bị
+            task.spawn(function()
+                UIS.InputBegan:Fire({ KeyCode = key })
+                task.wait(0.1)
+                UIS.InputEnded:Fire({ KeyCode = key })
+            end)
+        end
+    end
+}) 
+
+Dropdown = AddDropdown(Tab2o, {
+    Name = "SPEED",
+    Options = {"slow", "Fit", "Normal", "quite fast", "fast", "super fast", "extremely fast", "ultimate speed"},
+    Default = "SPEED",
+    Callback = function(selected)
+        local speedMap = {
+            ["slow"] = 1,             -- Tốc độ chậm nhất
+            ["Fit"] = 0.85,
+            ["Normal"] = 0.7,        
+            ["quite fast"] = 0.5,    
+            ["fast"] = 0.35,         
+            ["super fast"] = 0.2,    
+            ["extremely fast"] = 0.1, 
+            ["ultimate speed"] = 0.05 -- Tốc độ nhanh nhất
+        }
+
+        local attackSpeed = speedMap[selected]
+        if attackSpeed then
+            _G.AttackSpeed = attackSpeed
+        end
+    end
+})
+
+
+-- Tạo Auto Click để tăng tốc độ đánh
+task.spawn(function()
+    local vim = game:GetService("VirtualInputManager")
+    while task.wait(_G.AttackSpeed or 0.7) do -- Mặc định là Normal (0.7 giây mỗi lần đánh)
+        vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(0.05)
+        vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    end
+end)
+
+
+-----Trái và raid
+
+
+local autoCollectFruits = false -- Biến bật/tắt Auto Nhặt Trái
+
+-- Hàm dịch chuyển đến trái
+local function collectFruit(fruit)
+    if not fruit or not fruit:FindFirstChild("Handle") then return end
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    -- Bay đến trái (cao hơn một chút để tránh lỗi va chạm)
+    char.HumanoidRootPart.CFrame = fruit.Handle.CFrame + Vector3.new(0, 3, 0)
+end
+
+-- Hàm tìm trái gần nhất và nhặt
+local function autoCollect()
+    while autoCollectFruits do
+        local nearestFruit
+        local minDist = math.huge
+        local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+
+        -- Tìm trái gần nhất
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+                local fruitPos = fruit.Handle.Position
+                local dist = (playerPos - fruitPos).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    nearestFruit = fruit
+                end
+            end
+        end
+
+        -- Nếu tìm thấy trái, di chuyển đến nhặt
+        if nearestFruit then
+            collectFruit(nearestFruit)
+        end
+
+        wait(1) -- Kiểm tra mỗi giây
+    end
+end
+
+-- Hàm bật/tắt Auto Nhặt Trái
+local function toggleAutoCollect()
+    autoCollectFruits = not autoCollectFruits
+
+    if autoCollectFruits then
+        autoCollect()
+    end
+end
+
+-- Nút bật/tắt Auto Nhặt Trái
+AddButton(Tab6o, {
+    Name = "Auto Nhặt Trái",
+    Callback = function()
+        toggleAutoCollect()
+    end
+})
+
+
+
+-----Dịch chuyển
+
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local vim = game:GetService("VirtualInputManager")
+
+-- Hàm tìm và tương tác với NPC chuyển SEA
+local function TeleportToSea(seaNumber)
+    local npcName = ""
+
+    if seaNumber == 2 then
+        npcName = "Experienced Captain" -- NPC ở SEA1 để đi SEA2
+    elseif seaNumber == 3 then
+        npcName = "King Red Head" -- NPC ở SEA2 để đi SEA3
+    elseif seaNumber == 1 then
+        npcName = "Elite Hunter" -- NPC ở SEA3 để về SEA1
+    end
+
+    -- Tìm NPC chuyển SEA
+    for _, npc in pairs(game.Workspace.NPCs:GetChildren()) do
+        if npc:IsA("Model") and npc.Name == npcName and npc:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = npc.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3) -- Đứng gần NPC
+            task.wait(1)
+
+            -- Giả lập nhấn chuột để tương tác NPC
+            vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+            task.wait(0.1)
+            vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+
+            -- Chờ mở menu SEA và xác nhận chuyển SEA
+            task.wait(2)
+            vim:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+            task.wait(0.1)
+            vim:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+            
+            break
+        end
+    end
+end
+
+-- Tạo 3 nút dịch chuyển SEA
+AddButton(Tab7o, {
+    Name = "Go to SEA 1",
+    Callback = function()
+        TeleportToSea(1)
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Go to SEA 2",
+    Callback = function()
+        TeleportToSea(2)
+    end
+})
+
+AddButton(Tab7o, {
+    Name = "Go to SEA 3",
+    Callback = function()
+        TeleportToSea(3)
+    end
+})
+
+
+-----Giao diện
+local espEnabled = false -- Biến kiểm soát trạng thái bật/tắt ESP
+local espEnabled = false -- Biến kiểm soát trạng thái bật/tắt ESP
+
+local function createESP(player) if player == game.Players.LocalPlayer then return end -- Không hiển thị bản thân
+
+local character = player.Character
+if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+local billboard = Instance.new("BillboardGui")
+billboard.Adornee = character.HumanoidRootPart
+billboard.Size = UDim2.new(0, 200, 0, 50) -- Mặc định kích thước lớn
+billboard.StudsOffset = Vector3.new(0, 3, 0) -- Đặt ở giữa nhân vật
+billboard.AlwaysOnTop = true
+
+local textLabel = Instance.new("TextLabel", billboard)
+textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.TextColor3 = Color3.new(1, 0, 0) -- Màu đỏ
+textLabel.TextScaled = true
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.TextStrokeTransparency = 0.2 -- Viền chữ giúp dễ nhìn hơn
+
+billboard.Parent = character.HumanoidRootPart
+
+-- Cập nhật vị trí & thông tin máu
+spawn(function()
+    while espEnabled and character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") do
+        local humanoid = character:FindFirstChild("Humanoid")
+        local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+        textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
+        wait(0.2)
+    end
+    billboard:Destroy()
+end)
+
+end
+
+-- Hàm bật/tắt ESP local function toggleESP() espEnabled = not espEnabled
+
+if espEnabled then
+    -- Thêm ESP cho tất cả người chơi
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            createESP(player)
+        end
+    end
+
+    -- Lắng nghe người chơi mới tham gia
+    game.Players.PlayerAdded:Connect(function(player)
+        if espEnabled then createESP(player) end
+    end)
+else
+    -- Xóa toàn bộ ESP khi tắt
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            for _, gui in pairs(player.Character.HumanoidRootPart:GetChildren()) do
+                if gui:IsA("BillboardGui") then gui:Destroy() end
+            end
+        end
+    end
+end
+
+end
+
+-- Nút bật/tắt ESP 
+AddButton(Tab9o, { 
+    Name = "esp player", 
+    Callback = function() 
+        toggleESP() 
+    end 
+})
+
+
+
+
+
+
+local fruitESPEnabled = false -- Biến bật/tắt ESP Trái
+
+local function createFruitESP(fruit)
+    if not fruit:IsA("Model") or not fruit:FindFirstChild("Handle") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = fruit.Handle
+    billboard.Size = UDim2.new(3, 0, 1.5, 0)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel", billboard)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 1, 0) -- Màu vàng
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansBold
+
+    billboard.Parent = fruit.Handle
+
+    -- Cập nhật thông tin khoảng cách real-time
+    spawn(function()
+        while fruitESPEnabled and fruit and fruit:FindFirstChild("Handle") do
+            local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+            local fruitPos = fruit.Handle.Position
+            local distance = (playerPos - fruitPos).Magnitude
+            textLabel.Text = string.format("🍏 %s | %dm", fruit.Name, math.floor(distance))
+            wait(0.2)
+        end
+        billboard:Destroy()
+    end)
+end
+
+-- Hàm bật/tắt ESP trái ác quỷ
+local function toggleFruitESP()
+    fruitESPEnabled = not fruitESPEnabled
+
+    if fruitESPEnabled then
+        -- Tạo ESP cho các trái đã có trên map
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+                createFruitESP(fruit)
+            end
+        end
+
+        -- Lắng nghe khi có trái mới xuất hiện
+        game.Workspace.ChildAdded:Connect(function(fruit)
+            if fruitESPEnabled then
+                wait(1) -- Đợi trái load
+                createFruitESP(fruit)
+            end
+        end)
+    else
+        -- Xóa toàn bộ ESP khi tắt
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+                for _, gui in pairs(fruit.Handle:GetChildren()) do
+                    if gui:IsA("BillboardGui") then gui:Destroy() end
+                end
+            end
+        end
+    end
+end
+
+-- Nút bật/tắt ESP Trái Ác Quỷ
+AddButton(Tab9o, {
+    Name = "ESP Trái Ác Quỷ",
+    Callback = function()
+        toggleFruitESP()
+    end
+}) 
