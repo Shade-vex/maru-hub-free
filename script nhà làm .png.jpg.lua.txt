@@ -258,7 +258,7 @@ AddButton(Tab7o, {
 
 -----Giao diện
 
-local espEnabled = false -- Trạng thái bật/tắt ESP
+local espEnabled = false -- Biến kiểm soát trạng thái bật/tắt ESP
 
 local function createESP(player)
     if player == game.Players.LocalPlayer then return end -- Không hiển thị bản thân
@@ -268,8 +268,8 @@ local function createESP(player)
 
     local billboard = Instance.new("BillboardGui")
     billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(0, 200, 0, 50) -- Kích thước ban đầu
-    billboard.StudsOffset = Vector3.new(0, 3, 0) -- Đặt ở giữa nhân vật
+    billboard.Size = UDim2.new(20, 0, 5, 0) -- Kích thước cố định
+    billboard.StudsOffset = Vector3.new(0, 0, 0) -- Đặt giữa nhân vật
     billboard.AlwaysOnTop = true
 
     local textLabel = Instance.new("TextLabel", billboard)
@@ -282,24 +282,13 @@ local function createESP(player)
 
     billboard.Parent = character.HumanoidRootPart
 
-    -- Cập nhật vị trí & kích thước theo khoảng cách
+    -- Cập nhật vị trí & thông tin máu
     spawn(function()
         while espEnabled and character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") do
             local humanoid = character:FindFirstChild("Humanoid")
-            local localPlayer = game.Players.LocalPlayer
-            if localPlayer and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local distance = (localPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
-                
-                -- Kích thước ESP thay đổi theo khoảng cách
-                local scale = math.clamp(distance / 10, 1, 10) -- Giới hạn tỉ lệ từ 1 đến 10 lần
-                local size = 20 * scale -- Khi ở gần, kích thước là 20, khi xa tăng dần
-
-                billboard.Size = UDim2.new(0, size * 10, 0, size * 2) -- ESP lớn hơn khi xa
-
-                -- Hiển thị thông tin máu & khoảng cách
-                textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
-            end
-            wait(0.1)
+            local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+            textLabel.Text = string.format("[%s] HP: %d | %dm", player.Name, math.floor(humanoid.Health), math.floor(distance))
+            wait(0.2)
         end
         billboard:Destroy()
     end)
@@ -392,6 +381,32 @@ local function toggleFruitESP()
         game.Workspace.ChildAdded:Connect(function(fruit)
             if fruitESPEnabled then
                 wait(1) -- Đợi trái load
+                createFruitESP(fruit)
+            end
+        end)
+    else
+        -- Xóa toàn bộ ESP khi tắt
+        for _, fruit in pairs(game.Workspace:GetChildren()) do
+            if fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+                for _, gui in pairs(fruit.Handle:GetChildren()) do
+                    if gui:IsA("BillboardGui") then gui:Destroy() end
+                end
+            end
+        end
+    end
+end
+
+-- Nút bật/tắt ESP Trái Ác Quỷ
+AddButton(Tab9o, {
+    Name = "ESP Trái Ác Quỷ",
+    Callback = function()
+        toggleFruitESP()
+    end
+})
+
+    end
+})
+   wait(1) -- Đợi trái load
                 createFruitESP(fruit)
             end
         end)
